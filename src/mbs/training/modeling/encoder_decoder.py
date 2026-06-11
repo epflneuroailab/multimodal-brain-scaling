@@ -1,4 +1,5 @@
 from collections import OrderedDict
+from pathlib import Path
 from typing import Union, Dict, Literal, List
 import pickle
 
@@ -8,6 +9,39 @@ from torch.fx import GraphModule
 from torchvision.models.feature_extraction import create_feature_extractor, get_graph_node_names
 
 from .decoders import create_decoder, create_projector
+
+
+def load_linear_probe(decoder: nn.Sequential, probe_path: Union[str, Path], freeze: bool = True) -> None:
+    """Load saved sklearn ridge weights into a linear PyTorch decoder."""
+    probe_path = Path(probe_path)
+    if not probe_path.exists():
+        raise FileNotFoundError(f"Linear probe file does not exist: {probe_path}")
+
+    with probe_path.open("rb") as f:
+        probe_model = pickle.load(f)
+
+    linear = decoder.fc1
+    weight = torch.as_tensor(probe_model["W"], dtype=linear.weight.dtype, device=linear.weight.device)
+    bias = torch.as_tensor(probe_model["b"], dtype=linear.bias.dtype, device=linear.bias.device)
+
+    if tuple(weight.shape) != tuple(linear.weight.shape):
+        raise ValueError(
+            f"Probe weight shape {tuple(weight.shape)} does not match decoder "
+            f"shape {tuple(linear.weight.shape)} for {probe_path}"
+        )
+    if tuple(bias.shape) != tuple(linear.bias.shape):
+        raise ValueError(
+            f"Probe bias shape {tuple(bias.shape)} does not match decoder "
+            f"shape {tuple(linear.bias.shape)} for {probe_path}"
+        )
+
+    with torch.no_grad():
+        linear.weight.copy_(weight)
+        linear.bias.copy_(bias)
+
+    for param in decoder.parameters():
+        param.requires_grad = not freeze
+
 
 class BrainEncoderDecoder(nn.Module):
     """
@@ -288,7 +322,7 @@ def create_encoder_decoder(backbone: nn.Module, feat_layers:Dict[str,str]=None, 
             input_dim = input_dim.numel()
                 
             output_dim = decoder_output_dims[decoder_label]
-            is_frozen = True
+            is_frozen = training_config.get('frozen_decoders', True)
             # Create the decoder
             decoders[decoder_label] = create_decoder(
                 input_dim=input_dim, 
@@ -298,13 +332,8 @@ def create_encoder_decoder(backbone: nn.Module, feat_layers:Dict[str,str]=None, 
                 is_frozen=is_frozen
             )
             if linear_probes_dir is not None and num_hidden_layers == 0:
-                # Load the linear probe weights
-                probe_path = f"{linear_probes_dir}/subject_{subject}/roi_{roi}.pkl"
-                with open(probe_path, 'rb') as f:
-                    probe_model = pickle.load(f)
-                # Assign the weights to the decoder
-                decoders[decoder_label].fc1.weight.data = probe_model['W']
-                decoders[decoder_label].fc1.bias.data = probe_model['b']
+                probe_path = Path(linear_probes_dir) / f"subject_{subject}" / f"roi_{roi}.pkl"
+                load_linear_probe(decoders[decoder_label], probe_path, freeze=is_frozen)
                 print(f"Loaded linear probe for subject {subject}, roi {roi} from {probe_path}")
             else:
                 print(f"Created new decoder for subject {subject}, roi {roi}")
@@ -336,13 +365,8 @@ def create_encoder_decoder(backbone: nn.Module, feat_layers:Dict[str,str]=None, 
                 is_frozen=is_frozen
             )
             if linear_probes_dir is not None and num_hidden_layers == 0:
-                # Load the linear probe weights
-                probe_path = f"{linear_probes_dir}/subject_{subject}/roi_{roi}.pkl"
-                with open(probe_path, 'rb') as f:
-                    probe_model = pickle.load(f)
-                # Assign the weights to the decoder
-                decoders[decoder_label].fc1.weight.data = probe_model['W']
-                decoders[decoder_label].fc1.bias.data = probe_model['b']
+                probe_path = Path(linear_probes_dir) / f"subject_{subject}" / f"roi_{roi}.pkl"
+                load_linear_probe(decoders[decoder_label], probe_path, freeze=is_frozen)
                 print(f"Loaded linear probe for subject {subject}, roi {roi} from {probe_path}")
             else:
                 print(f"Created new decoder for subject {subject}, roi {roi}")
@@ -366,4 +390,3 @@ def create_encoder_decoder(backbone: nn.Module, feat_layers:Dict[str,str]=None, 
     # print(brain_model)
 
     return brain_model
-

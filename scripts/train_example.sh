@@ -19,6 +19,13 @@ CONFIG_ENCODER="${CONFIG_ENCODER:-configs/training/encoders/finetune/deit/deit_s
 OUTPUT_DIR="${OUTPUT_DIR:-./outputs/train_example}"
 PRETRAINED_MODEL_ID="${PRETRAINED_MODEL_ID:-deit_small_imagenet_full_seed-0}"
 RUN_NAME="${RUN_NAME:-deit_small_finetune_example}"
+LINEAR_PROBES_DIR="${LINEAR_PROBES_DIR:-}"
+FROZEN_DECODERS="${FROZEN_DECODERS:-true}"
+
+linear_probe_args=()
+if [[ -n "${LINEAR_PROBES_DIR}" ]]; then
+    linear_probe_args+=(--linear-probes-dir "${LINEAR_PROBES_DIR}")
+fi
 
 mbs_run mbs-train \
     --config-encoder "$CONFIG_ENCODER" \
@@ -31,6 +38,8 @@ mbs_run mbs-train \
     --layer-commitment-dataset "$LAYER_COMMITMENT_DATASET" \
     --pretrained-model-id "$PRETRAINED_MODEL_ID" \
     --run-name "$RUN_NAME" \
+    "${linear_probe_args[@]}" \
+    --frozen-decoders "$FROZEN_DECODERS" \
     --disable-wandb \
     --max-epochs 100 \
     --opt sgd \

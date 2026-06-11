@@ -176,14 +176,35 @@ Example scripts are intentionally lightweight and are meant to be edited or driv
 
 ### 1. Fine-tune a backbone with neural supervision
 
+For the paper fine-tuning protocol, fit linear readout probes before fine-tuning, load them into the neural decoders during fine-tuning, and keep those readouts frozen. This isolates updates to the model representation instead of letting the readout absorb the neural objective.
+
+```bash
+MODEL_ID=resnet50_imagenet_full \
+FEATURES_DIR=outputs/features/resnet50_imagenet_full \
+DATA_HDF5_PATH=/path/to/neural_benchmark.h5 \
+PROBES_OUTPUT_DIR=outputs/linear_probes \
+uv run --no-sync mbs-evaluate-committed-layers \
+  --model_id "$MODEL_ID" \
+  --layer_commitments configs/evaluation/layer_commitment/layer_commitments.json \
+  --data_hdf5_path "$DATA_HDF5_PATH" \
+  --features_dir "$FEATURES_DIR" \
+  --output_dir outputs/probe_fit_check/"$MODEL_ID" \
+  --probes_output_dir "$PROBES_OUTPUT_DIR"
+```
+
+The training script expects the subject/ROI probe directory, so pass the saved model/benchmark leaf as `--linear-probes-dir`. With linear decoder configs (`decoder_hidden_layers: 0`), loaded readouts are frozen by default during fine-tuning. To intentionally train the loaded readouts too, set `FROZEN_DECODERS=false` or pass `--frozen-decoders false` to `mbs-train`.
+
 ```bash
 DATA_PATH_IMAGE=/path/to/imagenet \
 DATA_PATH_NEURAL=/path/to/neural_data \
 DATA_NEURAL_FILENAME=SachiMajajHong2015.h5 \
 DATA_NEURAL_REGIONS=V4,IT \
 OUTPUT_DIR=outputs/train_example \
+LINEAR_PROBES_DIR=outputs/linear_probes/resnet50_imagenet_full/SachiMajajHong2015 \
 bash scripts/train_example.sh
 ```
+
+After fine-tuning, discard these training-time probes when evaluating the updated model representations: re-extract features from the fine-tuned checkpoint and run evaluation normally, without `--probes_input_dir`, so the evaluation readout is fit on the updated representation.
 
 ### 2. Extract features for a stimulus set
 
