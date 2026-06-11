@@ -25,8 +25,19 @@ dependencies = [
 [project.optional-dependencies]
 training = [
     "albumentations==1.4.3",
+    # scaling-primate-vvs imports brainscore_vision (and top-level brainio) at
+    # module load, so training needs them too (kept in sync with evaluation).
+    # Mirrors the working conda dda/dda_torch envs: standalone brainscore-brainio
+    # provides the top-level `brainio` package, brainscore-core comes from PyPI.
+    "brainscore-brainio",
+    "brainscore-core",
+    "brainscore-vision",
+    "composer~=0.20.1",
     "lightning==2.5.0.post0",
     "opencv-python==4.6.0.66",
+    # scaling-primate-vvs imports open_clip in its training models (stripped by
+    # the requires-dist override below); pin to match the conda dda envs.
+    "open-clip-torch==2.23.0",
     "peft",
     "python-dotenv",
     "scaling-primate-vvs",
@@ -34,13 +45,19 @@ training = [
     "wandb==0.16.6",
 ]
 evaluation = [
+    "brainscore-brainio",
+    "brainscore-core",
     "brainscore-vision",
+    "composer~=0.20.1",
     "peft",
     "scaling-primate-vvs",
     "scikit-learn-intelex; platform_system != 'Darwin' or platform_machine != 'arm64'",
     "tables==3.10.2",
     "timm==0.9.16",
-    "transformers",
+    # composer pins torch to 2.2.x; transformers 5.x requires torch>=2.4 and
+    # disables its torch backend otherwise. Pin to the torch-2.2-compatible
+    # version used by the conda dda env.
+    "transformers==4.57.3",
 ]
 visualization = [
     "matplotlib",
@@ -59,11 +76,26 @@ dev = [
 
 [tool.uv.sources]
 scaling-primate-vvs = { git = "https://github.com/epflneuroailab/scaling-primate-vvs.git" }
+# scaling-primate-vvs imports both Composer and brainscore_vision at module
+# load. Composer requires importlib_metadata>=5 while upstream brainscore-vision
+# pins importlib_metadata<5, which cannot both be satisfied. Composer is the
+# more crucial dependency, so use the brainscore_vision fork (matching what
+# scaling-primate-vvs itself uses) that drops the importlib_metadata<5 pin.
+# NOTE: this fork removes a brainscore dependency constraint and may behave
+# unexpectedly or fall out of date; use with caution.
+brainscore-vision = { git = "https://github.com/akgokce/brainscore_vision.git" }
+# brainscore_vision imports top-level `brainio`, which neither the fork nor the
+# PyPI brainscore-core wheel provides. The standalone brainscore-brainio package
+# (distribution name brainscore-brainio, import name brainio) supplies it; this
+# matches the working conda dda/dda_torch envs (brain-score/brainio @ acff11f,
+# v1.1.0). brainscore-core itself is left on PyPI.
+brainscore-brainio = { git = "https://github.com/brain-score/brainio.git" }
 
 # scaling-primate-vvs declares Composer/importlib-metadata constraints that
 # conflict with brainscore-vision. The original repo installs it with
 # `pip install --no-deps`; this override gives uv the same effect by treating
-# the package as having no transitive requirements.
+# the package as having no transitive requirements. Composer itself is added
+# back explicitly to the training/evaluation extras (it is imported directly).
 [[tool.uv.dependency-metadata]]
 name = "scaling-primate-vvs"
 version = "0.1.0"

@@ -62,17 +62,28 @@ uv sync --extra analysis --extra visualization       # fit + plot curves from re
 uv sync --extra dev                                  # tests
 ```
 
-After installing the relevant extra, entry points are available as console scripts:
+When chaining workflows, sync all needed extras once, then run commands with
+`--no-sync` so `uv` does not prune packages from extras omitted by a later
+command. The example scripts do this automatically: the first script you run
+prepares the combined environment, writes a readiness marker in `.venv`, and
+later scripts reuse that environment without syncing again.
 
 ```bash
-uv run mbs-download-artifacts --help
-uv run --extra training mbs-train --help
-uv run --extra evaluation mbs-extract-features --help
-uv run --extra evaluation mbs-evaluate-all-layers --help
-uv run --extra evaluation mbs-evaluate-committed-layers --help
-uv run --extra evaluation mbs-evaluate-attn-probe --help
-uv run --extra analysis mbs-fit-curves --help
+scripts/setup_env.sh                                 # optional explicit setup
+uv run --no-sync mbs-download-artifacts --help
+uv run --no-sync mbs-train --help
+uv run --no-sync mbs-extract-features --help
+uv run --no-sync mbs-evaluate-all-layers --help
+uv run --no-sync mbs-evaluate-committed-layers --help
+uv run --no-sync mbs-evaluate-attn-probe --help
+uv run --no-sync mbs-fit-curves --help
 ```
+
+By default, `scripts/setup_env.sh` and the example scripts install
+`training evaluation analysis`. Override that set with `MBS_EXTRAS`, for
+example `MBS_EXTRAS="training evaluation" scripts/setup_env.sh`, or use
+`MBS_EXTRAS=all-extras` for every optional dependency. Set
+`MBS_FORCE_SYNC=true` to refresh the environment deliberately.
 
 If you have already synced and activated an environment with the corresponding extras, the `uv run ...` prefix can be omitted. Each script is also reachable as `python -m mbs.<module>` (e.g. `python -m mbs.training.train`) if you prefer module-style invocation.
 
@@ -87,7 +98,7 @@ https://huggingface.co/datasets/epfl-neuroai/multimodal-brain-scaling
 Restore the released Parquet tables as local CSV files:
 
 ```bash
-uv run mbs-download-artifacts --artifacts-dir artifacts
+uv run --no-sync mbs-download-artifacts --artifacts-dir artifacts
 ```
 
 The downloader restores tables such as:
@@ -220,7 +231,7 @@ Configs can inherit from `base_config` files. Paths are resolved relative to the
 Run the test suite with:
 
 ```bash
-uv run pytest
+uv run --no-sync pytest
 ```
 
 If `uv` is unavailable but a compatible environment is active:

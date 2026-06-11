@@ -7,18 +7,20 @@
 
 set -euo pipefail
 
+source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/env.sh"
+
 DATA_PATH_IMAGE="${DATA_PATH_IMAGE:-./data/imagenet/}"
 DATA_PATH_NEURAL="${DATA_PATH_NEURAL:-./data/neural}"
 DATA_NEURAL_FILENAME="${DATA_NEURAL_FILENAME:-SachiMajajHong2015.h5}"
 DATA_NEURAL_REGIONS="${DATA_NEURAL_REGIONS:-V4,IT}"
 LAYER_COMMITMENTS="${LAYER_COMMITMENTS:-configs/evaluation/layer_commitment/layer_commitments.json}"
 LAYER_COMMITMENT_DATASET="${LAYER_COMMITMENT_DATASET:-bs_mh}"
-CONFIG_ENCODER="${CONFIG_ENCODER:-configs/training/encoders/finetune/resnet/defaults.yaml}"
+CONFIG_ENCODER="${CONFIG_ENCODER:-configs/training/encoders/finetune/deit/deit_small.yaml}"
 OUTPUT_DIR="${OUTPUT_DIR:-./outputs/train_example}"
-PRETRAINED_MODEL_ID="${PRETRAINED_MODEL_ID:-resnet50_imagenet_full}"
-RUN_NAME="${RUN_NAME:-resnet50_finetune_example}"
+PRETRAINED_MODEL_ID="${PRETRAINED_MODEL_ID:-deit_small_imagenet_full_seed-0}"
+RUN_NAME="${RUN_NAME:-deit_small_finetune_example}"
 
-uv run --extra training mbs-train \
+mbs_run mbs-train \
     --config-encoder "$CONFIG_ENCODER" \
     --save-dir "$OUTPUT_DIR" \
     --data-path-image "$DATA_PATH_IMAGE" \

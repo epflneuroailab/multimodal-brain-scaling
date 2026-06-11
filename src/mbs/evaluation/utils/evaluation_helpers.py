@@ -39,6 +39,15 @@ from mbs.metrics import (
 )
 
 
+def build_stimulus_id_mapping(stimulus_ids):
+    mapping = {}
+    for idx, stim_id in enumerate(stimulus_ids):
+        mapping[stim_id] = idx
+        if hasattr(stim_id, "decode"):
+            mapping[stim_id.decode("utf-8")] = idx
+    return mapping
+
+
 def deep_update(d, u):
     """
     Recursively updates a dictionary `d` with another dictionary `u`.
@@ -217,9 +226,7 @@ def load_layer_features(layer_name: str, features_folder: Path=None, features_fi
             layer_feats = f[layer_key][:]
             stimulus_ids = f['ids'][:]
     
-    if hasattr(stimulus_ids[0], 'decode'):
-        stimulus_ids = [stim_id.decode('utf-8') for stim_id in stimulus_ids]
-    stimulus_ids_mapping = {stim_id:idx for idx, stim_id in enumerate(stimulus_ids)}
+    stimulus_ids_mapping = build_stimulus_id_mapping(stimulus_ids)
 
     return layer_feats, stimulus_ids_mapping
 
