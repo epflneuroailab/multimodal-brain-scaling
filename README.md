@@ -1,7 +1,7 @@
 # Multimodal Scaling Laws for Task & Data-Optimized Models of Visual Cortex
 
 [![Project Page](https://img.shields.io/badge/Project%20Page-EPFL%20site-E60028.svg?logo=googlechrome&logoColor=white)](https://multimodal-brain-scaling.epfl.ch)
-[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-Results%20Dataset-FFD21E.svg?logo=huggingface)](https://huggingface.co/datasets/epfl-neuroai/multimodal-brain-scaling)
+[![Hugging Face](https://img.shields.io/badge/Hugging%20Face-Artifacts-FFD21E.svg?logo=huggingface)](https://huggingface.co/datasets/epfl-neuroai/multimodal-brain-scaling)
 [![OpenReview](https://img.shields.io/badge/OpenReview-OQ6jQHJPTT-1A3D91.svg?logoColor=white)](https://openreview.net/forum?id=OQ6jQHJPTT)
 [![ICML 2026](https://img.shields.io/badge/ICML-2026-0B5D1E.svg?logoColor=white)](https://icml.cc/virtual/2026/poster/64356)
 [![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
@@ -29,6 +29,7 @@ The codebase provides workflows for extracting model features, fitting linear an
 ```text
 configs/                 Research configs for models, training, readouts, layer commitments, and curve fitting
 scripts/                 End-to-end example shell workflows (train, extract, evaluate, fit curves)
+data_prep/               Data preprocessing notebooks and scripts for public neural datasets
 src/mbs/core/            Shared CLI, config, and path helpers
 src/mbs/metrics/         RSA, CKA, and Ridge-GCV metric implementations
 src/mbs/modeling/        Shared LoRA and projection utilities
@@ -53,12 +54,13 @@ cd multimodal-brain-scaling
 uv sync --locked
 ```
 
-Optional dependency groups (`training`, `evaluation`, `analysis`, `visualization`, `dev`) gate the per-workflow requirements. `uv sync` resolves the union of every group passed in a single invocation, so combine them as needed (it will also drop extras you omit). On macOS arm64, `scikit-learn-intelex` is skipped and evaluation falls back to standard scikit-learn.
+Optional dependency groups (`training`, `evaluation`, `analysis`, `visualization`, `data-prep`, `dev`) gate the per-workflow requirements. `uv sync` resolves the union of every group passed in a single invocation, so combine them as needed (it will also drop extras you omit). On macOS arm64, `scikit-learn-intelex` is skipped and evaluation falls back to standard scikit-learn.
 
 ```bash
 uv sync --all-extras                                 # everything (recommended for reproduction)
 uv sync --extra training --extra evaluation          # fine-tune + evaluate
 uv sync --extra analysis --extra visualization       # fit + plot curves from released artifacts
+uv sync --extra data-prep                            # preprocessing notebooks and scripts
 uv sync --extra dev                                  # tests
 ```
 
@@ -109,6 +111,31 @@ The downloader restores tables such as:
 - `mapping_results.csv`
 
 Raw neural datasets and image stimuli are not stored in this repository. Please obtain them from their original sources and licenses.
+
+## Data Preprocessing
+
+The `data_prep/` directory contains the preprocessing notebooks and helper scripts used to convert raw public datasets into the HDF5 files consumed by the extraction and evaluation workflows. These notebooks cover Brain-Score electrophysiology benchmarks, TVSD, THINGS-fMRI, NSD-fMRI, THINGS-MEG, THINGS-EEG1, THINGS-EEG2, and shared stimulus preparation.
+
+Install the preprocessing dependencies with:
+
+```bash
+uv sync --extra data-prep
+```
+
+Raw datasets and image stimuli remain governed by their original licenses and access procedures. Set local paths with environment variables before running notebooks or scripts:
+
+```bash
+export MBS_THINGS_RAW_DIR=/path/to/things_raw
+export MBS_NSD_DIR=/path/to/nsd
+export MBS_DATA_PREP_OUTPUT_DIR=/path/to/preprocessed_outputs
+```
+
+For NSD, first create or point `MBS_NSD_STIM_CSV` at `nsd_stim_mapping.csv` if it is not stored in `MBS_DATA_PREP_OUTPUT_DIR`. Then run a single-subject example or the batch wrapper:
+
+```bash
+bash data_prep/nsd/preprocess_nsd.sh
+bash data_prep/nsd/preprocess_nsd_all.sh
+```
 
 ## Neural Benchmarks
 

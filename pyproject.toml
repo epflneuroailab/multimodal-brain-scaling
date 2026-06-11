@@ -70,6 +70,20 @@ neuro = [
     "pybids==0.19.0",
     "pycortex==1.2.11",
 ]
+data-prep = [
+    "brainscore-brainio",
+    "brainscore-core",
+    "brainscore-vision",
+    "jupyter",
+    "mat73",
+    "matplotlib",
+    "mne",
+    "nibabel",
+    "nilearn",
+    "nsdcode",
+    "pillow",
+    "seaborn",
+]
 dev = [
     "pytest",
 ]
@@ -90,6 +104,7 @@ brainscore-vision = { git = "https://github.com/akgokce/brainscore_vision.git" }
 # matches the working conda dda/dda_torch envs (brain-score/brainio @ acff11f,
 # v1.1.0). brainscore-core itself is left on PyPI.
 brainscore-brainio = { git = "https://github.com/brain-score/brainio.git" }
+nsdcode = { git = "https://github.com/cvnlab/nsdcode.git" }
 
 # scaling-primate-vvs declares Composer/importlib-metadata constraints that
 # conflict with brainscore-vision. The original repo installs it with

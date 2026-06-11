@@ -1698,6 +1698,19 @@ wheels = [
 ]
 
 [[package]]
+name = "mat73"
+version = "0.65"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "h5py" },
+    { name = "numpy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/92/61/0e6375513085b13ad23ab150fc83d4d8faa91cba56eb2f30b646259f8214/mat73-0.65.tar.gz", hash = "sha256:ad38a06af3d483632bd939ee572b3724ea8c03d37916765d7278f9de95541ade", size = 19355, upload-time = "2024-07-24T09:12:33.007Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c9/24/e867b1b89b2a2102a5a3bb64ddcd49c5cb815244b2dadff7740c6a422e4f/mat73-0.65-py3-none-any.whl", hash = "sha256:aadfcd00f328eb8f75dd1d4a060a956dc0abefcf5af20f5bc69a5aae64d62cbf", size = 19665, upload-time = "2024-07-24T09:12:31.976Z" },
+]
+
+[[package]]
 name = "matplotlib"
 version = "3.10.9"
 source = { registry = "https://pypi.org/simple" }
@@ -1763,6 +1776,26 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/ca/84/620cc3f7e3adf6f5067e10f4dbae71295d8f9e16d5d3f9ef97c40f2f592c/mistune-3.2.1.tar.gz", hash = "sha256:7c8e5501d38bac1582e067e46c8343f17d57ea1aaa735823f3aba1fd59c88a28", size = 98003, upload-time = "2026-05-03T14:33:22.312Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/2a/7f/a946aa4f8752b37102b41e64dca18a1976ac705c3a0d1dfe74d820a02552/mistune-3.2.1-py3-none-any.whl", hash = "sha256:78cdb0ba5e938053ccf63651b352508d2efa9411dc8810bfb05f2dc5140c0048", size = 53749, upload-time = "2026-05-03T14:33:20.551Z" },
+]
+
+[[package]]
+name = "mne"
+version = "1.12.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "decorator" },
+    { name = "jinja2" },
+    { name = "lazy-loader" },
+    { name = "matplotlib" },
+    { name = "numpy" },
+    { name = "packaging" },
+    { name = "pooch" },
+    { name = "scipy" },
+    { name = "tqdm" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/95/72/24cd8137df5a185fe0856ff9b6f8a8f9d387d6783c51961a1c6300a4efe8/mne-1.12.1.tar.gz", hash = "sha256:244f844057f28a4da2509039dba637832ffb65f678ca76fc667312c493b12044", size = 7211821, upload-time = "2026-04-20T17:16:57.295Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/6c/da/a3280dbd8f0024b287b625ef97f8ef79ae853ed852e7732641d0ec3c2160/mne-1.12.1-py3-none-any.whl", hash = "sha256:7823bd276d570e9bed2e63e8d86fdbe74d5ee7817b6d01a8e4dc9510ef9e3a91", size = 7509566, upload-time = "2026-04-20T17:16:54.447Z" },
 ]
 
 [[package]]
@@ -1866,6 +1899,20 @@ dependencies = [
 analysis = [
     { name = "numba" },
 ]
+data-prep = [
+    { name = "brainscore-brainio" },
+    { name = "brainscore-core" },
+    { name = "brainscore-vision" },
+    { name = "jupyter" },
+    { name = "mat73" },
+    { name = "matplotlib" },
+    { name = "mne" },
+    { name = "nibabel" },
+    { name = "nilearn" },
+    { name = "nsdcode" },
+    { name = "pillow" },
+    { name = "seaborn" },
+]
 dev = [
     { name = "pytest" },
 ]
@@ -1908,18 +1955,28 @@ visualization = [
 [package.metadata]
 requires-dist = [
     { name = "albumentations", marker = "extra == 'training'", specifier = "==1.4.3" },
+    { name = "brainscore-brainio", marker = "extra == 'data-prep'", git = "https://github.com/brain-score/brainio.git" },
     { name = "brainscore-brainio", marker = "extra == 'evaluation'", git = "https://github.com/brain-score/brainio.git" },
     { name = "brainscore-brainio", marker = "extra == 'training'", git = "https://github.com/brain-score/brainio.git" },
+    { name = "brainscore-core", marker = "extra == 'data-prep'" },
     { name = "brainscore-core", marker = "extra == 'evaluation'" },
     { name = "brainscore-core", marker = "extra == 'training'" },
+    { name = "brainscore-vision", marker = "extra == 'data-prep'", git = "https://github.com/akgokce/brainscore_vision.git" },
     { name = "brainscore-vision", marker = "extra == 'evaluation'", git = "https://github.com/akgokce/brainscore_vision.git" },
     { name = "brainscore-vision", marker = "extra == 'training'", git = "https://github.com/akgokce/brainscore_vision.git" },
     { name = "composer", marker = "extra == 'evaluation'", specifier = "~=0.20.1" },
     { name = "composer", marker = "extra == 'training'", specifier = "~=0.20.1" },
     { name = "h5py" },
     { name = "huggingface-hub" },
+    { name = "jupyter", marker = "extra == 'data-prep'" },
     { name = "lightning", marker = "extra == 'training'", specifier = "==2.5.0.post0" },
+    { name = "mat73", marker = "extra == 'data-prep'" },
+    { name = "matplotlib", marker = "extra == 'data-prep'" },
     { name = "matplotlib", marker = "extra == 'visualization'" },
+    { name = "mne", marker = "extra == 'data-prep'" },
+    { name = "nibabel", marker = "extra == 'data-prep'" },
+    { name = "nilearn", marker = "extra == 'data-prep'" },
+    { name = "nsdcode", marker = "extra == 'data-prep'", git = "https://github.com/cvnlab/nsdcode.git" },
     { name = "numba", marker = "extra == 'analysis'" },
     { name = "numpy" },
     { name = "open-clip-torch", marker = "extra == 'training'", specifier = "==2.23.0" },
@@ -1927,6 +1984,7 @@ requires-dist = [
     { name = "pandas" },
     { name = "peft", marker = "extra == 'evaluation'" },
     { name = "peft", marker = "extra == 'training'" },
+    { name = "pillow", marker = "extra == 'data-prep'" },
     { name = "pyarrow" },
     { name = "pybids", marker = "extra == 'neuro'", specifier = "==0.19.0" },
     { name = "pycortex", marker = "extra == 'neuro'", specifier = "==1.2.11" },
@@ -1938,6 +1996,7 @@ requires-dist = [
     { name = "scikit-learn" },
     { name = "scikit-learn-intelex", marker = "(platform_machine != 'arm64' and extra == 'evaluation') or (sys_platform != 'darwin' and extra == 'evaluation')" },
     { name = "scipy" },
+    { name = "seaborn", marker = "extra == 'data-prep'" },
     { name = "seaborn", marker = "extra == 'visualization'" },
     { name = "tables", marker = "extra == 'evaluation'", specifier = "==3.10.2" },
     { name = "timm", marker = "extra == 'evaluation'", specifier = "==0.9.16" },
@@ -1948,7 +2007,7 @@ requires-dist = [
     { name = "transformers", marker = "extra == 'evaluation'", specifier = "==4.57.3" },
     { name = "wandb", marker = "extra == 'training'", specifier = "==0.16.6" },
 ]
-provides-extras = ["training", "evaluation", "visualization", "analysis", "neuro", "dev"]
+provides-extras = ["training", "evaluation", "visualization", "analysis", "neuro", "data-prep", "dev"]
 
 [[package]]
 name = "narwhals"
@@ -2106,6 +2165,26 @@ wheels = [
 ]
 
 [[package]]
+name = "nilearn"
+version = "0.13.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "jinja2" },
+    { name = "joblib" },
+    { name = "nibabel" },
+    { name = "numpy" },
+    { name = "packaging" },
+    { name = "pandas" },
+    { name = "requests" },
+    { name = "scikit-learn" },
+    { name = "scipy" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a6/c0/b06fa98658b9f43d7cd89c4b2527a637a2962d05838658f767d8dda8e790/nilearn-0.13.1.tar.gz", hash = "sha256:66d4a4f3f1dea9b8683806849ea8e91abfeac11e14f7e972a726f644e515bc2b", size = 46371538, upload-time = "2026-02-10T17:08:17.287Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/89/3d/91ff1823b291de709e92b01373ab9c1d582658ce4b795e443b76761cd2c8/nilearn-0.13.1-py3-none-any.whl", hash = "sha256:2543cea9e2b001c079b7f81d1bff3050576125eb906cf318a9992add9a63c19e", size = 10638666, upload-time = "2026-02-10T17:04:47.21Z" },
+]
+
+[[package]]
 name = "notebook"
 version = "7.5.6"
 source = { registry = "https://pypi.org/simple" }
@@ -2131,6 +2210,21 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/54/d2/92fa3243712b9a3e8bafaf60aac366da1cada3639ca767ff4b5b3654ec28/notebook_shim-0.2.4.tar.gz", hash = "sha256:b4b2cfa1b65d98307ca24361f5b30fe785b53c3fd07b7a47e89acb5e6ac638cb", size = 13167, upload-time = "2024-02-14T23:35:18.353Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f9/33/bd5b9137445ea4b680023eb0469b2bb969d61303dedb2aac6560ff3d14a1/notebook_shim-0.2.4-py3-none-any.whl", hash = "sha256:411a5be4e9dc882a074ccbcae671eda64cceb068767e9a3419096986560e1cef", size = 13307, upload-time = "2024-02-14T23:35:16.286Z" },
+]
+
+[[package]]
+name = "nsdcode"
+version = "1.0.0"
+source = { git = "https://github.com/cvnlab/nsdcode.git#bfd36a503cc90a3eb3ebfd69b269403f7e186924" }
+dependencies = [
+    { name = "matplotlib" },
+    { name = "nibabel" },
+    { name = "numpy" },
+    { name = "pandas" },
+    { name = "scikit-learn" },
+    { name = "scipy" },
+    { name = "setuptools-scm" },
+    { name = "tqdm" },
 ]
 
 [[package]]
@@ -2520,6 +2614,20 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/f9/e2/3e91f31a7d2b083fe6ef3fa267035b518369d9511ffab804f839851d2779/pluggy-1.6.0.tar.gz", hash = "sha256:7dcc130b76258d33b90f61b658791dede3486c3e6bfb003ee5c9bfb396dd22f3", size = 69412, upload-time = "2025-05-15T12:30:07.975Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/54/20/4d324d65cc6d9205fabedc306948156824eb9f0ee1633355a8f7ec5c66bf/pluggy-1.6.0-py3-none-any.whl", hash = "sha256:e920276dd6813095e9377c0bc5566d94c932c33b27a3e3945d8389c374dd4746", size = 20538, upload-time = "2025-05-15T12:30:06.134Z" },
+]
+
+[[package]]
+name = "pooch"
+version = "1.9.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "packaging" },
+    { name = "platformdirs" },
+    { name = "requests" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/83/43/85ef45e8b36c6a48546af7b266592dc32d7f67837a6514d111bced6d7d75/pooch-1.9.0.tar.gz", hash = "sha256:de46729579b9857ffd3e741987a2f6d5e0e03219892c167c6578c0091fb511ed", size = 61788, upload-time = "2026-01-30T19:15:09.649Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/2a/2d/d4bf65e47cea8ff2c794a600c4fd1273a7902f268757c531e0ee9f18aa58/pooch-1.9.0-py3-none-any.whl", hash = "sha256:f265597baa9f760d25ceb29d0beb8186c243d6607b0f60b83ecf14078dbc703b", size = 67175, upload-time = "2026-01-30T19:15:08.36Z" },
 ]
 
 [[package]]
@@ -3321,6 +3429,20 @@ wheels = [
 ]
 
 [[package]]
+name = "setuptools-scm"
+version = "10.0.5"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "packaging" },
+    { name = "setuptools" },
+    { name = "vcs-versioning" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/a5/b1/2a6a8ecd6f9e263754036a0b573360bdbd6873b595725e49e11139722041/setuptools_scm-10.0.5.tar.gz", hash = "sha256:bbba8fe754516cdefd017f4456721775e6ef9662bd7887fb52ae26813d4838c3", size = 56748, upload-time = "2026-03-27T15:57:05.751Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/5c/e1/342c4434df56aa537f6ce7647eefee521d96fbb828b08acd709865767652/setuptools_scm-10.0.5-py3-none-any.whl", hash = "sha256:f611037d8aae618221503b8fa89319f073438252ae3420e01c9ceec249131a0a", size = 21695, upload-time = "2026-03-27T15:57:03.969Z" },
+]
+
+[[package]]
 name = "shapely"
 version = "2.1.2"
 source = { registry = "https://pypi.org/simple" }
@@ -3785,6 +3907,18 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/53/66/a435d9ae49850b2f071f7ebd8119dd4e84872b01630d6736761e6e7fd847/validators-0.35.0.tar.gz", hash = "sha256:992d6c48a4e77c81f1b4daba10d16c3a9bb0dbb79b3a19ea847ff0928e70497a", size = 73399, upload-time = "2025-05-01T05:42:06.7Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/fa/6e/3e955517e22cbdd565f2f8b2e73d52528b14b8bcfdb04f62466b071de847/validators-0.35.0-py3-none-any.whl", hash = "sha256:e8c947097eae7892cb3d26868d637f79f47b4a0554bc6b80065dfe5aac3705dd", size = 44712, upload-time = "2025-05-01T05:42:04.203Z" },
+]
+
+[[package]]
+name = "vcs-versioning"
+version = "1.1.1"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "packaging" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/49/42/d97a7795055677961c63a1eef8e7b19d5968ed992ed3a70ab8eb012efad8/vcs_versioning-1.1.1.tar.gz", hash = "sha256:fabd75a3cab7dd8ac02fe24a3a9ba936bf258667b5a62ed468c9a1da0f5775bc", size = 97575, upload-time = "2026-03-27T20:42:41.613Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/e6/60/73603fbcdbe5e803855bcce4414f94eaeed449083bd8183e67161af78188/vcs_versioning-1.1.1-py3-none-any.whl", hash = "sha256:b541e2ba79fc6aaa3850f8a7f88af43d97c1c80649c01142ee4146eddbc599e4", size = 79851, upload-time = "2026-03-27T20:42:40.45Z" },
 ]
 
 [[package]]
