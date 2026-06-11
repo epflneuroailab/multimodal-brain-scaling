@@ -4,7 +4,6 @@
 [![Hugging Face](https://img.shields.io/badge/Hugging%20Face-Artifacts-FFD21E.svg?logo=huggingface)](https://huggingface.co/datasets/epfl-neuroai/multimodal-brain-scaling)
 [![OpenReview](https://img.shields.io/badge/OpenReview-OQ6jQHJPTT-1A3D91.svg?logoColor=white)](https://openreview.net/forum?id=OQ6jQHJPTT)
 [![ICML 2026](https://img.shields.io/badge/ICML-2026-0B5D1E.svg?logoColor=white)](https://icml.cc/virtual/2026/poster/64356)
-[![Python](https://img.shields.io/badge/python-3.11-blue.svg)](https://www.python.org/)
 
 Official code and result artifacts for:
 
@@ -71,7 +70,7 @@ prepares the combined environment, writes a readiness marker in `.venv`, and
 later scripts reuse that environment without syncing again.
 
 ```bash
-scripts/setup_env.sh                                 # optional explicit setup
+scripts/setup_env.sh --all-extras                   # optional explicit setup
 uv run --no-sync mbs-download-artifacts --help
 uv run --no-sync mbs-train --help
 uv run --no-sync mbs-extract-features --help
@@ -82,10 +81,10 @@ uv run --no-sync mbs-fit-curves --help
 ```
 
 By default, `scripts/setup_env.sh` and the example scripts install
-`training evaluation analysis`. Override that set with `MBS_EXTRAS`, for
-example `MBS_EXTRAS="training evaluation" scripts/setup_env.sh`, or use
-`MBS_EXTRAS=all-extras` for every optional dependency. Set
-`MBS_FORCE_SYNC=true` to refresh the environment deliberately.
+`training evaluation analysis`. Override that set with `--extras`, for
+example `scripts/setup_env.sh --extras "training evaluation"`, or use
+`--all-extras` for every optional dependency. Pass `--force-sync` to refresh
+the environment deliberately.
 
 If you have already synced and activated an environment with the corresponding extras, the `uv run ...` prefix can be omitted. Each script is also reachable as `python -m mbs.<module>` (e.g. `python -m mbs.training.train`) if you prefer module-style invocation.
 
@@ -122,19 +121,23 @@ Install the preprocessing dependencies with:
 uv sync --extra data-prep
 ```
 
-Raw datasets and image stimuli remain governed by their original licenses and access procedures. Set local paths with environment variables before running notebooks or scripts:
+Raw datasets and image stimuli remain governed by their original licenses and access procedures. Pass local paths to the preprocessing scripts explicitly:
 
 ```bash
-export MBS_THINGS_RAW_DIR=/path/to/things_raw
-export MBS_NSD_DIR=/path/to/nsd
-export MBS_DATA_PREP_OUTPUT_DIR=/path/to/preprocessed_outputs
+bash data_prep/nsd/preprocess_nsd.sh \
+  --ds-dir /path/to/nsd \
+  --output-dir /path/to/preprocessed_outputs
 ```
 
-For NSD, first create or point `MBS_NSD_STIM_CSV` at `nsd_stim_mapping.csv` if it is not stored in `MBS_DATA_PREP_OUTPUT_DIR`. Then run a single-subject example or the batch wrapper:
+For NSD, first create or pass `--stim-csv` pointing at `nsd_stim_mapping.csv` if it is not stored in the output directory. Then run a single-subject example or the batch wrapper:
 
 ```bash
-bash data_prep/nsd/preprocess_nsd.sh
-bash data_prep/nsd/preprocess_nsd_all.sh
+bash data_prep/nsd/preprocess_nsd.sh \
+  --ds-dir /path/to/nsd \
+  --output-dir /path/to/preprocessed_outputs
+bash data_prep/nsd/preprocess_nsd_all.sh \
+  --ds-dir /path/to/nsd \
+  --output-dir /path/to/preprocessed_outputs
 ```
 
 ## Neural Benchmarks
@@ -172,36 +175,32 @@ If this variable is unset or a local checkpoint is missing, supported loaders fa
 
 ## Example Workflows
 
-Example scripts are intentionally lightweight and are meant to be edited or driven by environment variables.
+Example scripts are intentionally lightweight and accept CLI arguments for local data and output paths.
 
 ### 1. Fine-tune a backbone with neural supervision
 
 For the paper fine-tuning protocol, fit linear readout probes before fine-tuning, load them into the neural decoders during fine-tuning, and keep those readouts frozen. This isolates updates to the model representation instead of letting the readout absorb the neural objective.
 
 ```bash
-MODEL_ID=resnet50_imagenet_full \
-FEATURES_DIR=outputs/features/resnet50_imagenet_full \
-DATA_HDF5_PATH=/path/to/neural_benchmark.h5 \
-PROBES_OUTPUT_DIR=outputs/linear_probes \
 uv run --no-sync mbs-evaluate-committed-layers \
-  --model_id "$MODEL_ID" \
+  --model_id resnet50_imagenet_full \
   --layer_commitments configs/evaluation/layer_commitment/layer_commitments.json \
-  --data_hdf5_path "$DATA_HDF5_PATH" \
-  --features_dir "$FEATURES_DIR" \
-  --output_dir outputs/probe_fit_check/"$MODEL_ID" \
-  --probes_output_dir "$PROBES_OUTPUT_DIR"
+  --data_hdf5_path /path/to/neural_benchmark.h5 \
+  --features_dir outputs/features/resnet50_imagenet_full \
+  --output_dir outputs/probe_fit_check/resnet50_imagenet_full \
+  --probes_output_dir outputs/linear_probes
 ```
 
-The training script expects the subject/ROI probe directory, so pass the saved model/benchmark leaf as `--linear-probes-dir`. With linear decoder configs (`decoder_hidden_layers: 0`), loaded readouts are frozen by default during fine-tuning. To intentionally train the loaded readouts too, set `FROZEN_DECODERS=false` or pass `--frozen-decoders false` to `mbs-train`.
+The training script expects the subject/ROI probe directory, so pass the saved model/benchmark leaf as `--linear-probes-dir`. With linear decoder configs (`decoder_hidden_layers: 0`), loaded readouts are frozen by default during fine-tuning. To intentionally train the loaded readouts too, pass `--frozen-decoders false` to the helper script or `mbs-train`.
 
 ```bash
-DATA_PATH_IMAGE=/path/to/imagenet \
-DATA_PATH_NEURAL=/path/to/neural_data \
-DATA_NEURAL_FILENAME=SachiMajajHong2015.h5 \
-DATA_NEURAL_REGIONS=V4,IT \
-OUTPUT_DIR=outputs/train_example \
-LINEAR_PROBES_DIR=outputs/linear_probes/resnet50_imagenet_full/SachiMajajHong2015 \
-bash scripts/train_example.sh
+bash scripts/train_example.sh \
+  --data-path-image /path/to/imagenet \
+  --data-path-neural /path/to/neural_data \
+  --data-neural-filename SachiMajajHong2015.h5 \
+  --data-neural-regions V4,IT \
+  --output-dir outputs/train_example \
+  --linear-probes-dir outputs/linear_probes/resnet50_imagenet_full/SachiMajajHong2015
 ```
 
 After fine-tuning, discard these training-time probes when evaluating the updated model representations: re-extract features from the fine-tuned checkpoint and run evaluation normally, without `--probes_input_dir`, so the evaluation readout is fit on the updated representation.
@@ -209,15 +208,15 @@ After fine-tuning, discard these training-time probes when evaluating the update
 ### 2. Extract features for a stimulus set
 
 ```bash
-MODEL_ID=resnet50_imagenet_full \
-DATA_ROOT=/path/to/stimuli.h5 \
-DATASET_TYPE=h5 \
-STIMULUS_SET_ID=object_images \
-OUTPUT_DIR=outputs/features/resnet50_imagenet_full \
-bash scripts/extract_example.sh
+bash scripts/extract_example.sh \
+  --model-id resnet50_imagenet_full \
+  --data-root /path/to/stimuli.h5 \
+  --dataset-type h5 \
+  --stimulus-set-id object_images \
+  --output-dir outputs/features/resnet50_imagenet_full
 ```
 
-When `--committed_extraction_layers` is used, `STIMULUS_SET_ID` selects the stimulus-set key in `configs/evaluation/layer_commitment/committed_extraction_layers.json`. Feature extraction supports:
+When `--committed_extraction_layers` is used, `--stimulus-set-id` selects the stimulus-set key in `configs/evaluation/layer_commitment/committed_extraction_layers.json`. Feature extraction supports:
 
 - HDF5 image datasets (`--dataset_type h5`)
 - THINGS-style image folders (`--dataset_type things`)
@@ -228,11 +227,11 @@ Large activations can be compressed with fixed random projections, with cached p
 ### 3. Evaluate committed layers
 
 ```bash
-MODEL_ID=resnet50_imagenet_full \
-FEATURES_DIR=outputs/features/resnet50_imagenet_full \
-DATA_HDF5_PATH=/path/to/neural_benchmark.h5 \
-OUTPUT_DIR=outputs/evaluation/resnet50_imagenet_full \
-bash scripts/evaluate_example.sh
+bash scripts/evaluate_example.sh \
+  --model-id resnet50_imagenet_full \
+  --features-dir outputs/features/resnet50_imagenet_full \
+  --data-hdf5-path /path/to/neural_benchmark.h5 \
+  --output-dir outputs/evaluation/resnet50_imagenet_full
 ```
 
 Evaluation workflows include:
@@ -246,13 +245,13 @@ Evaluation workflows include:
 After restoring the released result tables (see [Published Artifacts](#published-artifacts)), fit a pretraining-compute scaling curve aggregated across architectures and benchmarks with:
 
 ```bash
-RESULTS_CSV=./artifacts/pretraining_results_with_metadata.csv \
-EXPERIMENT_CONFIG=configs/analysis/scaling_compute/architecture_average/benchmark_average.yaml \
-OUTPUT_DIR=outputs/curve_fits \
-bash scripts/fit_curves_example.sh
+bash scripts/fit_curves_example.sh \
+  --results-csv ./artifacts/pretraining_results_with_metadata.csv \
+  --experiment-config configs/analysis/scaling_compute/architecture_average/benchmark_average.yaml \
+  --output-dir outputs/curve_fits
 ```
 
-The shipped `configs/analysis/` tree reproduces every scaling-curve experiment in the paper: pretraining compute / samples / parameters scans (`scaling_compute/`, `scaling_samples/`, `scaling_parameters/`), neural fine-tuning scaling (`finetuning/`), and mapping-data scaling for linear and attention-probe readouts (`mapping/`). Each subdirectory has a `*-base.yaml` capturing shared filters and fitting hyperparameters; per-architecture and per-benchmark leaves inherit via `base_config:` and only override the filters they change. Swap the `EXPERIMENT_CONFIG` path to reproduce any cell of the paper's results.
+The shipped `configs/analysis/` tree reproduces every scaling-curve experiment in the paper: pretraining compute / samples / parameters scans (`scaling_compute/`, `scaling_samples/`, `scaling_parameters/`), neural fine-tuning scaling (`finetuning/`), and mapping-data scaling for linear and attention-probe readouts (`mapping/`). Each subdirectory has a `*-base.yaml` capturing shared filters and fitting hyperparameters; per-architecture and per-benchmark leaves inherit via `base_config:` and only override the filters they change. Swap the `--experiment-config` path to reproduce any cell of the paper's results.
 
 ## Configs
 
