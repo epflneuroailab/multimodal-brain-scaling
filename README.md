@@ -293,7 +293,8 @@ Some CLI smoke tests skip optional entry points when the corresponding extras ar
 ## Citation
 
 ```bibtex
-@inproceedings{gokce2026multimodal_brain_scaling,
+@inproceedings{
+  gokce2026multimodal_brain_scaling,
   title     = {Multimodal Scaling Laws for Task \& Data-Optimized Models of Visual Cortex},
   author    = {Abdulkadir Gokce and Yingtian Tang and Martin Schrimpf},
   booktitle = {Forty-third International Conference on Machine Learning},
